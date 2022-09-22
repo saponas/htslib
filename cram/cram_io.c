@@ -2267,9 +2267,9 @@ int cram_compress_block2(cram_fd *fd, cram_slice *s,
         strat = Z_FILTERED;
     }
 
-    hts_log_info("Compressed block ID %d from %d to %d by method %s",
+    hts_log_info("Compressed block ID %d from %d to %d by method %s type=%d",
                  b->content_id, b->uncomp_size, b->comp_size,
-                 cram_block_method2str(b->method));
+                 cram_block_method2str(b->method), b->content_type);
 
     b->method = methmap[b->method];
 
