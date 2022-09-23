@@ -1423,8 +1423,8 @@ cram_block *cram_read_block(cram_fd *fd) {
     if (-1 == fd->vv.varint_decode32_crc(fd, &b->comp_size, &crc))   { free(b); return NULL; }
     if (-1 == fd->vv.varint_decode32_crc(fd, &b->uncomp_size, &crc)) { free(b); return NULL; }
 
-    //fprintf(stderr, "  method %d, ctype %d, cid %d, csize %d, ucsize %d\n",
-    //      b->method, b->content_type, b->content_id, b->comp_size, b->uncomp_size);
+    hts_log_info("method %d, ctype %d, cid %d, csize %d, ucsize %d\n",
+        b->method, b->content_type, b->content_id, b->comp_size, b->uncomp_size);
 
     if (b->method == RAW) {
         if (b->uncomp_size < 0 || b->comp_size != b->uncomp_size) {
