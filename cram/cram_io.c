@@ -2267,9 +2267,16 @@ int cram_compress_block2(cram_fd *fd, cram_slice *s,
         strat = Z_FILTERED;
     }
 
-    hts_log_info("Compressed block ID %d from %d to %d by method %s type=%d",
-                 b->content_id, b->uncomp_size, b->comp_size,
-                 cram_block_method2str(b->method), b->content_type);
+
+    if (b->content_id > DS_END)
+    {
+
+    }
+
+    // FIXME cram_block_dsid2str leaks memory at the moment
+    hts_log_info("Compressed block ID %s from %d to %d by method %s type=%d",
+                cram_block_dsid2str(b->content_id), b->uncomp_size, b->comp_size,
+                cram_block_method2str(b->method), b->content_type);
 
     b->method = methmap[b->method];
 
@@ -2292,6 +2299,75 @@ cram_metrics *cram_new_metrics(void) {
     m->unpackable = 0;
 
     return m;
+}
+
+char *cram_block_dsid2str(int32_t dsid) {
+
+    // if the content ID tag is less than DS_END assume it is encoded using this enum
+    if (dsid <= DS_END)
+    {
+        switch(dsid) {
+            case DS_CORE:   return "DS_CORE";
+            case DS_aux:    return "DS_aux";
+            case DS_aux_OQ: return "DS_aux_OQ";
+            case DS_aux_BQ: return "DS_aux_BQ";
+            case DS_aux_BD: return "DS_aux_BD";
+            case DS_aux_BI: return "DS_aux_BI";
+            case DS_aux_FZ: return "DS_aux_FZ";
+            case DS_aux_oq: return "DS_aux_oq";
+            case DS_aux_os: return "DS_aux_os";
+            case DS_aux_oz: return "DS_aux_oz";
+            case DS_ref:    return "DS_ref";
+            case DS_RN: return "DS_RN";
+            case DS_QS: return "DS_QS";
+            case DS_IN: return "DS_IN";
+            case DS_SC: return "DS_SC";
+            case DS_BF: return "DS_BF";
+            case DS_CF: return "DS_CF";
+            case DS_AP: return "DS_AP";
+            case DS_RG: return "DS_RG";
+            case DS_MQ: return "DS_MQ";
+            case DS_NS: return "DS_NS";
+            case DS_MF: return "DS_MF";
+            case DS_TS: return "DS_TS";
+            case DS_NP: return "DS_NP";
+            case DS_NF: return "DS_NF";
+            case DS_RL: return "DS_RL";
+            case DS_FN: return "DS_FN";
+            case DS_FC: return "DS_FC";
+            case DS_FP: return "DS_FP";
+            case DS_DL: return "DS_DL";
+            case DS_BA: return "DS_BA";
+            case DS_BS: return "DS_BS";
+            case DS_TL: return "DS_TL";
+            case DS_RI: return "DS_RI";
+            case DS_RS: return "DS_RS";
+            case DS_PD: return "DS_PD";
+            case DS_HC: return "DS_HC";
+            case DS_BB: return "DS_BB";
+            case DS_QQ: return "DS_QQ";
+            case DS_TN: return "DS_TN";
+            case DS_RN_len: return "DS_RN_len";
+            case DS_SC_len: return "DS_SC_len";
+            case DS_BB_len: return "DS_BB_len";
+            case DS_QQ_len: return "DS_QQ_len";
+            case DS_TC: return "DS_TC";
+            case DS_TM: return "DS_TM";
+            case DS_TV: return "DS_TV";
+            case DS_END:    return "DS_END";
+            case BM_ERROR: break;
+        }
+        return "?";
+    }
+
+    // If the content ID is greater than DS_END, assume it is encoded as ASCII in the SAM Tag format
+    char *samcode = malloc(4);
+    samcode[0] = (dsid >> 16) & 0xFF;
+    samcode[1] = (dsid >> 8) & 0xFF;
+    samcode[2] = dsid & 0xFF;
+    samcode[3] = '\0';
+    
+    return samcode;
 }
 
 char *cram_block_method2str(enum cram_block_method_int m) {

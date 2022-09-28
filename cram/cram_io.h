@@ -175,6 +175,7 @@ int cram_compress_block2(cram_fd *fd, cram_slice *s,
 cram_metrics *cram_new_metrics(void);
 char *cram_block_method2str(enum cram_block_method_int m);
 char *cram_content_type2str(enum cram_content_type t);
+char *cram_block_dsid2str(int32_t dsid);
 
 /*
  * Find an external block by its content_id
