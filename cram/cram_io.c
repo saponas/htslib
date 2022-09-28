@@ -1423,8 +1423,9 @@ cram_block *cram_read_block(cram_fd *fd) {
     if (-1 == fd->vv.varint_decode32_crc(fd, &b->comp_size, &crc))   { free(b); return NULL; }
     if (-1 == fd->vv.varint_decode32_crc(fd, &b->uncomp_size, &crc)) { free(b); return NULL; }
 
-    hts_log_info("method %d, ctype %d, cid %d, csize %d, ucsize %d\n",
-        b->method, b->content_type, b->content_id, b->comp_size, b->uncomp_size);
+// FIXME cram_block_dsid2str leaks memory at the moment
+    hts_log_info("method %d, ctype %s, cid %d, csize %d, ucsize %d\n",
+        b->method, cram_block_dsid2str(b->content_id), b->content_id, b->comp_size, b->uncomp_size);
 
     if (b->method == RAW) {
         if (b->uncomp_size < 0 || b->comp_size != b->uncomp_size) {
@@ -2361,11 +2362,15 @@ char *cram_block_dsid2str(int32_t dsid) {
     }
 
     // If the content ID is greater than DS_END, assume it is encoded as ASCII in the SAM Tag format
-    char *samcode = malloc(4);
-    samcode[0] = (dsid >> 16) & 0xFF;
-    samcode[1] = (dsid >> 8) & 0xFF;
-    samcode[2] = dsid & 0xFF;
-    samcode[3] = '\0';
+    char *samcode = malloc(8);
+    samcode[0] = 'T';
+    samcode[1] = 'A';
+    samcode[2] = 'G';
+    samcode[3] = ':';
+    samcode[4] = (dsid >> 16) & 0xFF;
+    samcode[5] = (dsid >> 8) & 0xFF;
+    samcode[6] = dsid & 0xFF;
+    samcode[7] = '\0';
     
     return samcode;
 }
